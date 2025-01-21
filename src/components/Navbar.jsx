@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Navbar = () => {
+const Navbar = ({ onLoginClick, onRegisterClick }) => {
   const total = 25000;
   const token = false;
 
@@ -17,8 +17,8 @@ const Navbar = () => {
             </>
           ) : (
             <>
-              <button className="btn btn-outline-light me-2">🔐 Login</button>
-              <button className="btn btn-outline-light me-2">🔐 Register</button>
+              <button onClick={onLoginClick} className="btn btn-outline-light me-2">🔐 Login</button>
+              <button onClick={onRegisterClick} className="btn btn-outline-light me-2">🔐 Register</button>
             </>
           )}
           <button className="btn btn-outline-light">🛒 Total: ${total.toLocaleString()}</button>
