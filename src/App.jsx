@@ -1,33 +1,23 @@
-import React, { useState } from 'react';
-import Navbar from './components/Navbar';
-import Home from './components/Home';
-import Footer from './components/Footer';
-import Login from './components/Login';
-import Register from './components/Register';
+import Footer from "./components/Footer";
+import Navbar from "./components/Navbar";
+import Header from './components/Header';
+import Cart from "./components/Cart";
+
+// import LoginPage from "./components/Login";
+// import RegisterPage from "./components/Register";
+// import Home from "./components/Home";
 
 const App = () => {
-    const [showLogin, setShowLogin] = useState(false);
-    const [showRegister, setShowRegister] = useState(false);
-
-    const handleLoginClick = () => {
-        setShowLogin(true);
-        setShowRegister(false);
-    };
-
-    const handleRegisterClick = () => {
-        setShowRegister(true);
-        setShowLogin(false);
-    };
-
-    return (
-        <>
-            <Navbar onLoginClick={handleLoginClick} onRegisterClick={handleRegisterClick} />
-            {showLogin && <Login />}
-            {showRegister && <Register />}
-            <Home />
-            <Footer />
-        </>
-    );
+return (
+<div>
+<Navbar />
+<Header />
+{/*  <Home /> */}
+<Cart />
+{/* <RegisterPage /> */}
+{/* <LoginPage /> */}
+<Footer />
+</div>
+);
 };
-
 export default App;
