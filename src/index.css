@@ -1,5 +1,7 @@
 :root {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 body {
@@ -27,8 +29,8 @@ a:hover {
 }
 
 footer {
-  margin-top: auto;
   width: 100%;
+  margin-top: auto;
 }
 
 .card {
