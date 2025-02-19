@@ -5,12 +5,17 @@ import App from './App';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import './index.css';
+import { CartProvider } from './context/CartContext';
+import { PizzaProvider } from './context/PizzaContext';
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <App />
+      <PizzaProvider>
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </PizzaProvider>
     </BrowserRouter>
   </React.StrictMode>
 );

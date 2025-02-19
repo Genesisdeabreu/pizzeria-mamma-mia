@@ -1,6 +1,17 @@
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const Navegation = () => {
+  const { getTotal, getItemsCount } = useCart();
+  
+  
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('es-CL', {
+      style: 'currency',
+      currency: 'CLP'
+    }).format(price);
+  };
+
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container">
@@ -46,8 +57,16 @@ const Navegation = () => {
               </button>
             </li>
             <li className="nav-item ms-lg-3">
-              <Link className="btn btn-outline-danger" to="/cart">
-                🛒 Total: $25.000
+              <Link 
+                className="btn btn-outline-danger position-relative" 
+                to="/cart"
+              >
+                🛒 Total: {formatPrice(getTotal())}
+                {getItemsCount() > 0 && (
+                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    {getItemsCount()}
+                  </span>
+                )}
               </Link>
             </li>
           </ul>
