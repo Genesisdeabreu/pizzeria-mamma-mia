@@ -1,9 +1,11 @@
 import React from 'react';
 import { useCart } from '../context/CartContext';
+import { useUser } from '../context/UserContext';
 import { Link } from 'react-router-dom';
 
 const Cart = () => {
   const { cart, removeFromCart, updateQuantity, getTotal } = useCart();
+  const { token } = useUser();
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('es-CL', {
@@ -97,9 +99,20 @@ const Cart = () => {
                 <h5>Total:</h5>
                 <h5>{formatPrice(getTotal())}</h5>
               </div>
-              <button className="btn btn-success w-100 mt-3">
+              <button 
+                className="btn btn-success w-100 mt-3"
+                disabled={!token}
+                title={!token ? "Debes iniciar sesión para pagar" : ""}
+              >
                 Ir a Pagar 💳
               </button>
+              {!token && (
+                <div className="text-center mt-2">
+                  <small className="text-muted">
+                    <Link to="/login">Inicia sesión</Link> para completar tu compra
+                  </small>
+                </div>
+              )}
             </div>
           </div>
         </div>
