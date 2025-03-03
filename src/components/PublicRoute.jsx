@@ -1,8 +1,8 @@
 import { Navigate } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import { useAuth } from '../context/AuthContext';
 
 export const PublicRoute = ({ children }) => {
-  const { token } = useUser();
+  const { token } = useAuth();
   
   if (token) {
     return <Navigate to="/" replace />;

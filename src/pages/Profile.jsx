@@ -1,26 +1,40 @@
-import React from 'react';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Profile = () => {
-    return (
-      <div className="container mt-5">
-        <div className="row justify-content-center">
-          <div className="col-md-6">
-            <div className="card">
-              <div className="card-body text-center">
-                <h2 className="card-title mb-4">Perfil de Usuario</h2>
-                <div className="mb-4">
-                  <h5>Email:</h5>
-                  <p className="text-muted">genesisdabreu@gmail.com</p>
-                </div>
-                <button className="btn btn-danger">
-                  Cerrar Sesión 🚪
-                </button>
-              </div>
-            </div>
-          </div>
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  if (!user) return null;
+
+  return (
+    <div className="container mt-5">
+      <div className="card">
+        <div className="card-body">
+          <h2 className="card-title">Perfil de Usuario</h2>
+          <p className="card-text">Email: {user.email}</p>
+          <button 
+            className="btn btn-danger"
+            onClick={handleLogout}
+          >
+            Cerrar Sesión
+          </button>
         </div>
       </div>
-    );
-  };
-  
-  export default Profile;
+    </div>
+  );
+};
+
+export default Profile;

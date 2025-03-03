@@ -1,46 +1,130 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Register = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [message, setMessage] = useState('');
+  const [userData, setUserData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: ''
+  });
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { register } = useAuth();
+  const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!email || !password || !confirmPassword) {
-            setMessage('Todos los campos son obligatorios.');
-            return;
-        }
-        if (password.length < 6) {
-            setMessage('La contraseña debe tener al menos 6 caracteres.');
-            return;
-        }
-        if (password !== confirmPassword) {
-            setMessage('Las contraseñas no coinciden.');
-            return;
-        }
-        setMessage('Registro exitoso.');
-    };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-    return (
-        <form onSubmit={handleSubmit} className="login-form">
-            <div className="form-group">
-                <label>Email:</label>
-                <input type="email" className="form-control" value={email} onChange={(e) => setEmail(e.target.value)} required />
+    if (userData.password !== userData.confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      await register({
+        email: userData.email,
+        password: userData.password
+      });
+      navigate('/profile');
+    } catch (err) {
+      setError(err.message || 'Error al registrar usuario');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setUserData({
+      ...userData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  return (
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-md-6">
+          <div className="card">
+            <div className="card-body">
+              <h2 className="text-center mb-4">Registro</h2>
+              
+              {error && (
+                <div className="alert alert-danger" role="alert">
+                  {error}
+                </div>
+              )}
+
+              <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                  <label htmlFor="email" className="form-label">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    className="form-control"
+                    id="email"
+                    name="email"
+                    value={userData.email}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="password" className="form-label">
+                    Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="password"
+                    name="password"
+                    value={userData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="mb-3">
+                  <label htmlFor="confirmPassword" className="form-label">
+                    Confirmar Contraseña
+                  </label>
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={userData.confirmPassword}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn btn-primary w-100"
+                  disabled={loading}
+                >
+                  {loading ? 'Registrando...' : 'Registrarse'}
+                </button>
+              </form>
+
+              <div className="mt-3 text-center">
+                <p>
+                  ¿Ya tienes una cuenta?{' '}
+                  <Link to="/login">Inicia sesión aquí</Link>
+                </p>
+              </div>
             </div>
-            <div className="form-group">
-                <label>Contraseña:</label>
-                <input type="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </div>
-            <div className="form-group">
-                <label>Confirmar Contraseña:</label>
-                <input type="password" className="form-control" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
-            </div>
-            <button type="submit" className="btn btn-primary">Registrar</button>
-            {message && <p className="alert alert-warning">{message}</p>}
-        </form>
-    );
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default Register;

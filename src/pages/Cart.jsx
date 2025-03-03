@@ -1,122 +1,126 @@
-import React from 'react';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
-import { useUser } from '../context/UserContext';
-import { Link } from 'react-router-dom';
+import { checkoutService } from '../services/checkoutService';
 
 const Cart = () => {
-  const { cart, removeFromCart, updateQuantity, getTotal } = useCart();
-  const { token } = useUser();
+  const navigate = useNavigate();
+  const { cart, removeFromCart, updateQuantity, getTotal, clearCart } = useCart();
+  const [checkoutLoading, setCheckoutLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('es-CL', {
-      style: 'currency',
-      currency: 'CLP'
-    }).format(price);
+  const handleCheckout = async () => {
+    setCheckoutLoading(true);
+    setError('');
+    setSuccess(false);
+    try {
+      await checkoutService.checkout(cart);
+      setSuccess(true);
+      clearCart();
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+    } catch (err) {
+      setError('Error al procesar el pago');
+    } finally {
+      setCheckoutLoading(false);
+    }
   };
 
-  if (cart.length === 0) {
-    return (
-      <div className="container mt-5 text-center">
-        <h2>Carrito de Compras</h2>
-        <p>Tu carrito está vacío</p>
-        <Link to="/" className="btn btn-primary">
-          Ir a comprar 🍕
-        </Link>
-      </div>
-    );
-  }
+  const handleQuantityChange = (itemId, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeFromCart(itemId);
+    } else {
+      updateQuantity(itemId, newQuantity);
+    }
+  };
 
   return (
     <div className="container mt-4">
-      <h2 className="text-center mb-4">Carrito de Compras</h2>
-      <div className="row">
-        <div className="col-md-8">
-          {cart.map((item) => (
+      <h2 className="mb-4">🛒 Carrito de Compras</h2>
+      {error && <div className="alert alert-danger">{error}</div>}
+      {success && (
+        <div className="alert alert-success">
+          ¡Compra realizada con éxito! Redirigiendo...
+        </div>
+      )}
+      
+      {cart.length === 0 ? (
+        <div className="alert alert-info">
+          Tu carrito está vacío. <button 
+            className="btn btn-link"
+            onClick={() => navigate('/')}
+          >
+            ¡Agrega algunas pizzas!
+          </button>
+        </div>
+      ) : (
+        <>
+          {cart.map(item => (
             <div key={item.id} className="card mb-3">
               <div className="row g-0">
-                <div className="col-md-4">
-                  <img
-                    src={item.img}
-                    className="img-fluid rounded-start"
-                    alt={item.name}
-                    style={{ height: '200px', objectFit: 'cover' }}
-                  />
+                <div className="col-md-2">
+                  <img src={item.img} className="img-fluid rounded-start" alt={item.name} />
                 </div>
-                <div className="col-md-8">
+                <div className="col-md-10">
                   <div className="card-body">
-                    <h5 className="card-title">{item.name}</h5>
-                    <p className="card-text">
-                      <small className="text-muted">
-                        Precio unitario: {formatPrice(item.price)}
-                      </small>
-                    </p>
-                    <div className="d-flex align-items-center gap-2">
-                      <button
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                        disabled={item.quantity <= 1}
-                      >
-                        -
-                      </button>
-                      <span className="mx-2">{item.quantity}</span>
-                      <button
-                        className="btn btn-outline-secondary btn-sm"
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      >
-                        +
-                      </button>
-                      <button
-                        className="btn btn-danger btn-sm ms-3"
+                    <div className="d-flex justify-content-between align-items-center">
+                      <h5 className="card-title">{item.name}</h5>
+                      <button 
+                        className="btn btn-danger btn-sm"
                         onClick={() => removeFromCart(item.id)}
                       >
-                        Eliminar
+                        ✖
                       </button>
                     </div>
-                    <p className="card-text mt-2">
-                      <strong>
-                        Subtotal: {formatPrice(item.price * item.quantity)}
-                      </strong>
-                    </p>
+                    <div className="d-flex justify-content-between align-items-center mt-2">
+                      <div className="input-group" style={{ width: '200px' }}>
+                        <button 
+                          className="btn btn-outline-secondary px-3 fs-5"
+                          onClick={() => handleQuantityChange(item.id, item.quantity - 1)}
+                        >
+                          -
+                        </button>
+                        <input 
+                          type="number" 
+                          className="form-control text-center fs-5"
+                          value={item.quantity}
+                          onChange={(e) => handleQuantityChange(item.id, parseInt(e.target.value) || 0)}
+                          style={{ width: '80px' }}
+                        />
+                        <button 
+                          className="btn btn-outline-secondary px-3 fs-5"
+                          onClick={() => handleQuantityChange(item.id, item.quantity + 1)}
+                        >
+                          +
+                        </button>
+                      </div>
+                      <h5 className="mb-0">${item.price * item.quantity}</h5>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           ))}
-        </div>
-        <div className="col-md-4">
-          <div className="card">
+          
+          <div className="card mt-4">
             <div className="card-body">
-              <h5 className="card-title">Resumen del pedido</h5>
-              <hr />
-              {cart.map((item) => (
-                <div key={item.id} className="d-flex justify-content-between mb-2">
-                  <span>{item.name} x{item.quantity}</span>
-                  <span>{formatPrice(item.price * item.quantity)}</span>
-                </div>
-              ))}
-              <hr />
-              <div className="d-flex justify-content-between">
-                <h5>Total:</h5>
-                <h5>{formatPrice(getTotal())}</h5>
+              <div className="d-flex justify-content-between align-items-center">
+                <h4>Total:</h4>
+                <h4>${getTotal()}</h4>
               </div>
               <button 
-                className="btn btn-success w-100 mt-3"
-                disabled={!token}
-                title={!token ? "Debes iniciar sesión para pagar" : ""}
+                className="btn btn-success w-100 mt-3 py-2 fs-5"
+                onClick={handleCheckout}
+                disabled={checkoutLoading}
               >
-                Ir a Pagar 💳
+                {checkoutLoading ? 'Procesando pago...' : 'Proceder al Pago 💳'}
               </button>
-              {!token && (
-                <div className="text-center mt-2">
-                  <small className="text-muted">
-                    <Link to="/login">Inicia sesión</Link> para completar tu compra
-                  </small>
-                </div>
-              )}
             </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

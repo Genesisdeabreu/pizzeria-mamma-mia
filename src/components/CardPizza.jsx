@@ -25,7 +25,7 @@ const CardPizza = ({ id, name, price, ingredients, img, desc }) => {
       ingredients 
     });
     
-    // Efecto visual temporal
+   
     setTimeout(() => setIsAdding(false), 500);
   };
   
